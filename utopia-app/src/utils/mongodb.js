@@ -1,27 +1,26 @@
-const { MongoClient } = require('mongodb');
-const uri = process.env.uri;
+const { MongoClient } = require("mongodb");
 
 async function main() {
-    uri;
+  const uri = ;
+  if (!uri) {
+    console.log(uri)
+    throw new Error('Missing environment variable: "URI"');
+  }
 
-    const client = new MongoClient(uri);
-    try {
-        await client.connect();
-    
-        await listDatabases(client);
-    
-    } catch (e) {
-        console.error(e);
-    }
-    finally {
-        await client.close();
-    }
- }
+  let client;
 
- main().catch(console.error);
- async function listDatabases(client){
-    databasesList = await client.db().admin().listDatabases();
+  try {
+    client = new MongoClient(uri, {
+      tls: true,
+      tlsAllowInvalidCertificates: true,
+    });
+    await client.connect();
+    console.log("Connected to MongoDB", client.db);
+  } catch (e) {
+    console.error("MongoDB Connection Error:", e);
+  } finally {
+    if (client) await client.close(); // Close only if defined
+  }
+}
 
-    console.log("Databases:");
-    databasesList.databases.forEach(db => console.log(` - ${Utopia}`));
-};
+main().catch(console.error);
