@@ -2,55 +2,9 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import express from 'express'  // Importing Express
-import cors from 'cors'        // Importing CORS
-import { MongoClient } from 'mongodb'  // Importing MongoDB
-import dotenv from "dotenv";
+import DbConnection from './dbConnection'
 
-dotenv.config();
-
-const server = express()
-const PORT = 3001
-
-
-// Middleware for CORS and JSON handling
-server.use(cors())
-server.use(express.json())
-
-// MongoDB connection setup
-const MONGO_URI = process.env.MONGO_URI
-// @ts-ignore
-const client = new MongoClient(MONGO_URI)
-let db;
-
-// Establish MongoDB connection before starting the server
-client.connect()
-  .then(() => {
-    db = client.db("Utopia");
-    console.log("Connected to MongoDB");
-    // Now start the server
-    server.listen(3001, () => {
-      console.log("Server running on http://localhost:3001");
-    });
-  })
-  .catch((error) => {
-    console.error("Failed to connect to MongoDB:", error);
-  });
-
-// Express route to fetch data
-server.get("/api/data", async (req, res) => {
-  if (!db) {
-    return res.status(500).json({ error: "Database not connected" });
-  }
-
-  try {
-    const data = await db.collection("Races").find().toArray();
-    res.json(data); // Send back the fetched data
-  } catch (err) {
-    console.error("Error fetching data:", err);
-    res.status(500).json({ error: "Failed to fetch data" });
-  }
-});
+DbConnection();
 
 function createWindow(): void {
   // Create the browser window.
